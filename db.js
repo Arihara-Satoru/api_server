@@ -18,13 +18,30 @@ createTable.run();
 
 // 准备一些常用的SQL语句
 const statements = {
+  //插入新用户
   insertUser: db.prepare(
     "INSERT INTO users (username, password, nickname, email, user_pic) VALUES (?, ?, ?, ?, ?)"
   ),
+  //根据用户名查询用户
   getUserByUsername: db.prepare("SELECT * FROM users WHERE username = ?"),
+  //根据用户id查询用户
+  getUserById: db.prepare(
+    "SELECT id, username, nickname, email, user_pic FROM users WHERE id = ?"
+  ),
+  //根据用户id查询用户密码
+  getUserPasswordById: db.prepare("SELECT password FROM users WHERE id = ?"),
+  //查询所有用户
   getAllUsers: db.prepare(
     "SELECT id, username, nickname, email, user_pic FROM users"
   ),
+  //根据用户id更新用户信息
+  updateUserById: db.prepare(
+    "UPDATE users SET nickname = ?, email = ? WHERE id = ?"
+  ),
+  //根据用户id更新用户密码
+  updatePasswordById: db.prepare("UPDATE users SET password = ? WHERE id = ?"),
+  //根据用户id更新用户头像
+  updateAvatarById: db.prepare("UPDATE users SET user_pic = ? WHERE id = ?"),
 };
 
 module.exports = {

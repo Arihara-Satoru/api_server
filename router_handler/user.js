@@ -2,6 +2,10 @@
 const { statements } = require("../db");
 // 导入 bcryptjs
 const bcrypt = require("bcryptjs");
+// 导入生成 Token 的包
+const jwt = require("jsonwebtoken");
+// 导入全局的配置文件
+const config = require("../config");
 
 //新用户注册函数
 exports.regUser = (req, res) => {
@@ -48,10 +52,17 @@ exports.login = (req, res) => {
       return res.cc("密码错误");
     }
 
+    // 在服务器端生成 Token 的字符串
+    const user_info = { ...user, password: "", user_pic: "" };
+    // 对用户的信息进行加密，生成 Token 字符串
+    const tokenStr = jwt.sign(user_info, config.jwtSecretKey, {
+      expiresIn: config.expiresIn,
+    });
+
     res.send({
       status: 0,
       message: "登录成功",
-      user: { id: user.id, username: user.username },
+      token: "Bearer " + tokenStr,
     });
   } catch (error) {
     res.cc(error);

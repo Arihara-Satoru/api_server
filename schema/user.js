@@ -25,3 +25,40 @@ exports.reg_login_schema = {
     password,
   },
 };
+
+// 更新用户信息的验证规则对象
+exports.update_userinfo_schema = {
+  body: {
+    nickname: joi.string().required(),
+    email: joi.string().email().required(),
+  },
+};
+
+// 更新密码的验证规则对象
+exports.update_password_schema = {
+  body: {
+    // type 为 0 表示更新密码（需校验旧密码），为 1 表示重置密码
+    type: joi.number().valid(0, 1).required(),
+    // 如果 type 为 0，则 oldPassword 必填
+    oldPassword: joi.when("type", {
+      is: 0,
+      then: password,
+      otherwise: joi.optional(),
+    }),
+    // 新密码必填，且如果 type 为 0，新旧密码不能相同
+    newPassword: joi.when("type", {
+      is: 0,
+      then: joi.not(joi.ref("oldPassword")).concat(password).messages({
+        "any.invalid": "新旧密码不能相同！",
+      }),
+      otherwise: password,
+    }),
+  },
+};
+
+// 更新头像的验证规则对象
+exports.update_avatar_schema = {
+  body: {
+    avatar: joi.string().dataUri().required(),
+  },
+};
