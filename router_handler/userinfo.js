@@ -1,6 +1,7 @@
 //导入数据库操作模块
 const db = require("../db");
 // 导入 bcryptjs 模块
+// 用于对密码进行加密和验证
 const bcrypt = require("bcryptjs");
 
 //获取用户基本信息的处理函数

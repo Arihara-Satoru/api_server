@@ -4,7 +4,7 @@ const Database = require("better-sqlite3");
 const db = new Database("./database.db", { verbose: console.log });
 
 // 创建用户表（如果不存在）
-const createTable = db.prepare(`
+const createUsersTable = db.prepare(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -14,7 +14,19 @@ const createTable = db.prepare(`
     user_pic TEXT
   )
 `);
-createTable.run();
+createUsersTable.run();
+
+// 创建文章分类表（如果不存在）
+const createArticleCateTable = db.prepare(`
+  CREATE TABLE IF NOT EXISTS ev_article_cate (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    alias TEXT NOT NULL,
+    is_delete INTEGER NOT NULL DEFAULT 0,
+    author_id INTEGER NOT NULL
+  )
+`);
+createArticleCateTable.run();
 
 // 准备一些常用的SQL语句
 const statements = {
@@ -42,6 +54,32 @@ const statements = {
   updatePasswordById: db.prepare("UPDATE users SET password = ? WHERE id = ?"),
   //根据用户id更新用户头像
   updateAvatarById: db.prepare("UPDATE users SET user_pic = ? WHERE id = ?"),
+
+  // --- 文章分类相关的 SQL 语句 ---
+  // 查询当前用户所有未被删除的文章分类
+  getAllArticleCates: db.prepare(
+    "SELECT * FROM ev_article_cate WHERE is_delete = 0 AND author_id = ? ORDER BY id ASC"
+  ),
+  // 插入新文章分类
+  insertArticleCate: db.prepare(
+    "INSERT INTO ev_article_cate (name, alias, author_id) VALUES (?, ?, ?)"
+  ),
+  // 根据 id 查询文章分类
+  getArticleCateById: db.prepare(
+    "SELECT * FROM ev_article_cate WHERE id = ? AND author_id = ?"
+  ),
+  // 根据名称或别名查询文章分类（用于查重，限定在当前用户下）
+  getArticleCateByNameOrAlias: db.prepare(
+    "SELECT * FROM ev_article_cate WHERE (name = ? OR alias = ?) AND author_id = ?"
+  ),
+  // 根据 id 更新文章分类
+  updateArticleCateById: db.prepare(
+    "UPDATE ev_article_cate SET name = ?, alias = ? WHERE id = ? AND author_id = ?"
+  ),
+  // 根据 id 软删除文章分类
+  deleteArticleCateById: db.prepare(
+    "UPDATE ev_article_cate SET is_delete = 1 WHERE id = ? AND author_id = ?"
+  ),
 };
 
 module.exports = {

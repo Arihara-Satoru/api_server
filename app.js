@@ -30,6 +30,41 @@ app.use((req, res, next) => {
 // 导入配置文件
 const config = require("./config");
 
+// 导入 Swagger 相关模块
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
+// Swagger 配置
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: "3.0.0",
+    info: {
+      title: "API Server 接口文档",
+      version: "1.0.0",
+      description: "基于 Express 的 API Server 接口文档",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+  },
+  // 指定包含 Swagger 注释的文件路径
+  apis: ["./router/*.js"],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 // 解析 token 的中间件
 const { expressjwt: jwt } = require("express-jwt");
 
@@ -44,6 +79,7 @@ app.use(
 const userRouter = require("./router/user");
 app.use("/api", userRouter);
 app.use("/my", require("./router/userinfo"));
+app.use("/my/article", require("./router/artcate"));
 
 // 定义错误级别中间件
 const joi = require("joi");
